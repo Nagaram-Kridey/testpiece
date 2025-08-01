@@ -49,11 +49,11 @@ function Competitors() {
   };
 
   const marketShareData = {
-    labels: competitorData?.competitors?.map(comp => comp.name) || [],
+    labels: competitorData?.competitors?.map(comp => comp?.name || 'Unnamed') || [],
     datasets: [
       {
         label: 'Market Share (%)',
-        data: competitorData?.competitors?.map(comp => comp.marketShare) || [],
+        data: competitorData?.competitors?.map(comp => comp?.marketShare || 0) || [],
         backgroundColor: [
           'rgba(59, 130, 246, 0.8)',
           'rgba(16, 185, 129, 0.8)',
@@ -74,11 +74,11 @@ function Competitors() {
   };
 
   const priceComparisonData = {
-    labels: competitorData?.competitors?.map(comp => comp.name) || [],
+    labels: competitorData?.competitors?.map(comp => comp?.name || 'Unnamed') || [],
     datasets: [
       {
         label: 'Price ($)',
-        data: competitorData?.competitors?.map(comp => comp.price) || [],
+        data: competitorData?.competitors?.map(comp => comp?.price || 0) || [],
         backgroundColor: 'rgba(34, 197, 94, 0.8)',
         borderColor: 'rgba(34, 197, 94, 1)',
         borderWidth: 1,
@@ -88,7 +88,6 @@ function Competitors() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Competitor Analysis</h1>
@@ -96,7 +95,6 @@ function Competitors() {
         </div>
       </div>
 
-      {/* Analysis Controls */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -139,10 +137,8 @@ function Competitors() {
         </div>
       </div>
 
-      {/* Competitor Analysis Results */}
       {competitorData && (
         <div className="space-y-6">
-          {/* Competitive Position */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Competitive Position</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -153,7 +149,7 @@ function Competitors() {
                 <div>
                   <p className="text-sm text-gray-600">Price Position</p>
                   <p className="text-lg font-semibold text-gray-900 capitalize">
-                    {competitorData.analysis?.pricePosition || 'Unknown'}
+                    {competitorData?.analysis?.pricePosition || 'Unknown'}
                   </p>
                 </div>
               </div>
@@ -164,7 +160,7 @@ function Competitors() {
                 <div>
                   <p className="text-sm text-gray-600">Price Difference</p>
                   <p className="text-lg font-semibold text-gray-900">
-                    {competitorData.analysis?.priceDifference || 0}%
+                    {competitorData?.analysis?.priceDifference ?? 0}%
                   </p>
                 </div>
               </div>
@@ -175,7 +171,7 @@ function Competitors() {
                 <div>
                   <p className="text-sm text-gray-600">Competitive Advantage</p>
                   <p className="text-lg font-semibold text-gray-900">
-                    {competitorData.analysis?.competitiveAdvantage || 'None'}
+                    {competitorData?.analysis?.competitiveAdvantage || 'None'}
                   </p>
                 </div>
               </div>
@@ -186,133 +182,99 @@ function Competitors() {
                 <div>
                   <p className="text-sm text-gray-600">Recommendations</p>
                   <p className="text-lg font-semibold text-gray-900">
-                    {competitorData.analysis?.recommendations?.length || 0}
+                    {competitorData?.analysis?.recommendations?.length ?? 0}
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Competitors List */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Top Competitors</h2>
             </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {competitorData.competitors?.map((competitor, index) => (
-                  <div key={competitor.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                          <span className="text-lg font-bold text-primary-600">#{index + 1}</span>
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-gray-900">{competitor.name}</h3>
-                          <p className="text-sm text-gray-600">{competitor.brand}</p>
-                        </div>
+            <div className="p-6 space-y-4">
+              {competitorData?.competitors?.map((competitor, index) => (
+                <div key={competitor?.id || index} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                        <span className="text-lg font-bold text-primary-600">#{index + 1}</span>
                       </div>
-                      <div className="flex items-center space-x-6">
-                        <div className="text-center">
-                          <p className="text-sm text-gray-600">Price</p>
-                          <p className="font-semibold text-gray-900">${competitor.price}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-sm text-gray-600">Rating</p>
-                          <div className="flex items-center space-x-1">
-                            <span className="font-semibold text-gray-900">{competitor.rating}</span>
-                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-sm text-gray-600">Market Share</p>
-                          <p className="font-semibold text-gray-900">{competitor.marketShare}%</p>
-                        </div>
-                        <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                          <Eye className="w-4 h-4" />
-                        </button>
+                      <div>
+                        <h3 className="font-medium text-gray-900">{competitor?.name || 'N/A'}</h3>
+                        <p className="text-sm text-gray-600">{competitor?.brand || 'Unknown'}</p>
                       </div>
                     </div>
-                    
-                    {/* Competitor Features */}
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <p className="text-sm font-medium text-gray-900 mb-2">Strengths</p>
-                          <ul className="text-sm text-gray-600 space-y-1">
-                            {competitor.strengths?.slice(0, 2).map((strength, idx) => (
-                              <li key={idx}>• {strength}</li>
-                            ))}
-                          </ul>
+                    <div className="flex items-center space-x-6">
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Price</p>
+                        <p className="font-semibold text-gray-900">${competitor?.price ?? '0'}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Rating</p>
+                        <div className="flex items-center space-x-1">
+                          <span className="font-semibold text-gray-900">{competitor?.rating ?? 0}</span>
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900 mb-2">Weaknesses</p>
-                          <ul className="text-sm text-gray-600 space-y-1">
-                            {competitor.weaknesses?.slice(0, 2).map((weakness, idx) => (
-                              <li key={idx}>• {weakness}</li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900 mb-2">Features</p>
-                          <div className="flex flex-wrap gap-1">
-                            {competitor.features?.slice(0, 3).map((feature, idx) => (
-                              <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                                {feature}
-                              </span>
-                            ))}
-                          </div>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Market Share</p>
+                        <p className="font-semibold text-gray-900">{competitor?.marketShare ?? 0}%</p>
+                      </div>
+                      <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 mb-2">Strengths</p>
+                        <ul className="text-sm text-gray-600 space-y-1">
+                          {competitor?.strengths?.slice(0, 2).map((s, i) => <li key={i}>• {s}</li>) || []}
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 mb-2">Weaknesses</p>
+                        <ul className="text-sm text-gray-600 space-y-1">
+                          {competitor?.weaknesses?.slice(0, 2).map((w, i) => <li key={i}>• {w}</li>) || []}
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 mb-2">Features</p>
+                        <div className="flex flex-wrap gap-1">
+                          {competitor?.features?.slice(0, 3).map((f, i) => (
+                            <span key={i} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                              {f}
+                            </span>
+                          )) || []}
                         </div>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Market Share Chart */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Market Share Comparison</h3>
               <div className="h-64">
-                <Bar 
-                  data={marketShareData} 
-                  options={{ 
-                    maintainAspectRatio: false,
-                    scales: {
-                      y: {
-                        beginAtZero: true,
-                        max: 100
-                      }
-                    }
-                  }} 
-                />
+                <Bar data={marketShareData} options={{ maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }} />
               </div>
             </div>
-
-            {/* Price Comparison Chart */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Price Comparison</h3>
               <div className="h-64">
-                <Bar 
-                  data={priceComparisonData} 
-                  options={{ 
-                    maintainAspectRatio: false,
-                    scales: {
-                      y: {
-                        beginAtZero: true
-                      }
-                    }
-                  }} 
-                />
+                <Bar data={priceComparisonData} options={{ maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }} />
               </div>
             </div>
           </div>
 
-          {/* Market Insights */}
-          {competitorData.marketInsights && (
+          {competitorData?.marketInsights && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Market Insights</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -324,7 +286,7 @@ function Competitors() {
                         <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
                         <span className="text-sm text-gray-700">{trend}</span>
                       </li>
-                    ))}
+                    )) || []}
                   </ul>
                 </div>
                 <div>
@@ -335,7 +297,7 @@ function Competitors() {
                         <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
                         <span className="text-sm text-gray-700">{opportunity}</span>
                       </li>
-                    ))}
+                    )) || []}
                   </ul>
                 </div>
                 <div>
@@ -346,7 +308,7 @@ function Competitors() {
                         <div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
                         <span className="text-sm text-gray-700">{threat}</span>
                       </li>
-                    ))}
+                    )) || []}
                   </ul>
                 </div>
               </div>
@@ -355,7 +317,6 @@ function Competitors() {
         </div>
       )}
 
-      {/* No Analysis State */}
       {!competitorData && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
           <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -369,4 +330,4 @@ function Competitors() {
   );
 }
 
-export default Competitors; 
+export default Competitors;
