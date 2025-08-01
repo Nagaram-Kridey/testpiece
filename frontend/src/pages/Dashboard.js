@@ -18,7 +18,7 @@ function Dashboard() {
   const stats = [
     {
       name: 'Total Products',
-      value: products.length,
+      value: products?.length || 0,
       icon: Package,
       color: 'bg-blue-500',
       change: '+12%',
