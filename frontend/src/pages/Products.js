@@ -24,15 +24,14 @@ function Products() {
   const [sortOrder, setSortOrder] = useState('asc');
   const [filterCategory, setFilterCategory] = useState('all');
 
-  const categories = ['all', ...new Set(products.map(p => p.category ?? ''))];
+  const categories = ['all', ...new Set(products?.map(p => p.category))];
 
   const filteredAndSortedProducts = products
     .filter(product => {
       const matchesSearch =
-        (product.name ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (product.description ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (product.brand ?? '').toLowerCase().includes(searchTerm.toLowerCase());
-
+        product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.brand?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = filterCategory === 'all' || product.category === filterCategory;
       return matchesSearch && matchesCategory;
     })
@@ -41,8 +40,8 @@ function Products() {
       let bValue = b[sortBy];
 
       if (sortBy === 'price') {
-        aValue = parseFloat(aValue ?? 0);
-        bValue = parseFloat(bValue ?? 0);
+        aValue = parseFloat(aValue);
+        bValue = parseFloat(bValue);
       }
 
       if (sortOrder === 'asc') {
@@ -132,40 +131,22 @@ function Products() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product
-                </th>
-                <th
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort('category')}
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('category')}>
                   <div className="flex items-center space-x-1">
                     <span>Category</span>
-                    {sortBy === 'category' && (
-                      sortOrder === 'asc' ? <SortAsc className="w-3 h-3" /> : <SortDesc className="w-3 h-3" />
-                    )}
+                    {sortBy === 'category' && (sortOrder === 'asc' ? <SortAsc className="w-3 h-3" /> : <SortDesc className="w-3 h-3" />)}
                   </div>
                 </th>
-                <th
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort('price')}
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('price')}>
                   <div className="flex items-center space-x-1">
                     <span>Price</span>
-                    {sortBy === 'price' && (
-                      sortOrder === 'asc' ? <SortAsc className="w-3 h-3" /> : <SortDesc className="w-3 h-3" />
-                    )}
+                    {sortBy === 'price' && (sortOrder === 'asc' ? <SortAsc className="w-3 h-3" /> : <SortDesc className="w-3 h-3" />)}
                   </div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rating
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -195,14 +176,10 @@ function Products() {
                         {product.category}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${product.price}
-                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.price}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <span className="text-sm text-gray-900 mr-1">
-                          {product.analytics?.rating ?? 0}
-                        </span>
+                        <span className="text-sm text-gray-900 mr-1">{product.analytics?.rating ?? 0}</span>
                         <div className="flex text-yellow-400">
                           {[...Array(5)].map((_, i) => (
                             <svg
@@ -223,16 +200,10 @@ function Products() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
-                        <button
-                          onClick={() => handleEdit(product)}
-                          className="text-primary-600 hover:text-primary-900 p-1"
-                        >
+                        <button onClick={() => handleEdit(product)} className="text-primary-600 hover:text-primary-900 p-1">
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => handleDelete(product.id)}
-                          className="text-red-600 hover:text-red-900 p-1"
-                        >
+                        <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-900 p-1">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
