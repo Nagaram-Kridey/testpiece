@@ -16,43 +16,46 @@ function Dashboard() {
   const { products, loading } = useProduct();
 
   const stats = [
-    {
-      name: 'Total Products',
-      value: products?.length || 0,
-      icon: Package,
-      color: 'bg-blue-500',
-      change: '+12%',
-      changeType: 'positive'
-    },
-    {
-      name: 'Active Analysis',
-      value: products.filter(p => p.analytics?.views > 0).length,
-      icon: BarChart3,
-      color: 'bg-green-500',
-      change: '+8%',
-      changeType: 'positive'
-    },
-    {
-      name: 'Reports Generated',
-      value: Math.floor(products.length * 0.7),
-      icon: FileText,
-      color: 'bg-purple-500',
-      change: '+15%',
-      changeType: 'positive'
-    },
-    {
-      name: 'Avg Rating',
-      value: products.length > 0 
-        ? (products.reduce((sum, p) => sum + (p.analytics?.rating || 0), 0) / products.length).toFixed(1)
+  {
+    name: 'Total Products',
+    value: products?.length || 0,
+    icon: Package,
+    color: 'bg-blue-500',
+    change: '+12%',
+    changeType: 'positive'
+  },
+  {
+    name: 'Active Analysis',
+    value: products?.filter(p => p.analytics?.views > 0).length || 0,
+    icon: BarChart3,
+    color: 'bg-green-500',
+    change: '+8%',
+    changeType: 'positive'
+  },
+  {
+    name: 'Reports Generated',
+    value: Math.floor((products?.length || 0) * 0.7),
+    icon: FileText,
+    color: 'bg-purple-500',
+    change: '+15%',
+    changeType: 'positive'
+  },
+  {
+    name: 'Avg Rating',
+    value:
+      products?.length > 0
+        ? (
+            products.reduce((sum, p) => sum + (p.analytics?.rating || 0), 0) / products.length
+          ).toFixed(1)
         : '0.0',
-      icon: Star,
-      color: 'bg-yellow-500',
-      change: '+0.2',
-      changeType: 'positive'
-    }
-  ];
+    icon: Star,
+    color: 'bg-yellow-500',
+    change: '+0.2',
+    changeType: 'positive'
+  }
+];
 
-  const recentProducts = products.slice(0, 5);
+  const recentProducts = products?.slice(0, 5) || [];
 
   return (
     <div className="space-y-6">
