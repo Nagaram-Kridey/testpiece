@@ -100,7 +100,7 @@ function Reports() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
               <option value="">Choose a product</option>
-              {products.map((product) => (
+              {Array.isArray(products) && products.map((product) => (
                 <option key={product.id} value={product.id}>
                   {product.name}
                 </option>
