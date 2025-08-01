@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 function Reports() {
-  const { products, selectedProduct, analysisData, competitorData, generateReport } = useProduct();
+  const { products = [], selectedProduct, analysisData, competitorData, generateReport } = useProduct();
   const [selectedProductId, setSelectedProductId] = useState('');
   const [reportType, setReportType] = useState('comprehensive');
   const [generating, setGenerating] = useState(false);
@@ -42,8 +42,7 @@ function Reports() {
   ];
 
   const handleGenerateReport = async () => {
-    if (!selectedProductId) return;
-    
+    if (!selectedProductId || !generateReport) return;
     setGenerating(true);
     try {
       await generateReport(reportType);
@@ -83,7 +82,6 @@ function Reports() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
@@ -91,14 +89,11 @@ function Reports() {
         </div>
       </div>
 
-      {/* Report Generation */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Generate New Report</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Product
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Select Product</label>
             <select
               value={selectedProductId}
               onChange={(e) => setSelectedProductId(e.target.value)}
@@ -114,9 +109,7 @@ function Reports() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Report Type
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
             <select
               value={reportType}
               onChange={(e) => setReportType(e.target.value)}
@@ -152,7 +145,6 @@ function Reports() {
         </div>
       </div>
 
-      {/* Report Templates */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {reportTemplates.map((template) => (
           <div key={template.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -179,7 +171,6 @@ function Reports() {
         ))}
       </div>
 
-      {/* Recent Reports */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Recent Reports</h2>
@@ -217,35 +208,23 @@ function Reports() {
         </div>
       </div>
 
-      {/* Report Features */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Report Features</h3>
           <ul className="space-y-3">
-            <li className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-700">Comprehensive product analysis</span>
-            </li>
-            <li className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-700">Sentiment analysis results</span>
-            </li>
-            <li className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-700">Performance metrics and charts</span>
-            </li>
-            <li className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-700">Competitor analysis</span>
-            </li>
-            <li className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-700">Market trends and insights</span>
-            </li>
-            <li className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-700">Actionable recommendations</span>
-            </li>
+            {[
+              "Comprehensive product analysis",
+              "Sentiment analysis results",
+              "Performance metrics and charts",
+              "Competitor analysis",
+              "Market trends and insights",
+              "Actionable recommendations"
+            ].map((text, idx) => (
+              <li key={idx} className="flex items-center space-x-3">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm text-gray-700">{text}</span>
+              </li>
+            ))}
           </ul>
         </div>
 
@@ -280,4 +259,4 @@ function Reports() {
   );
 }
 
-export default Reports; 
+export default Reports;
