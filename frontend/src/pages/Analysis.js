@@ -40,7 +40,7 @@ ChartJS.register(
 );
 
 function Analysis() {
-  const { products, selectedProduct, analysisData, analyzeProduct, loading } = useProduct();
+  const { products = [], selectedProduct = null, analysisData = {}, analyzeProduct, loading } = useProduct();
   const [searchParams] = useSearchParams();
   const [selectedProductId, setSelectedProductId] = useState('');
   const [analysisType, setAnalysisType] = useState('all');
@@ -55,20 +55,24 @@ function Analysis() {
   const handleAnalyze = async () => {
     if (!selectedProductId) return;
     try {
-      await analyzeProduct(selectedProductId, analysisType);
+      await analyzeProduct?.(selectedProductId, analysisType);
     } catch (error) {
       console.error('Analysis failed:', error);
     }
   };
+
+  const sentiment = analysisData?.sentiment;
+  const performance = analysisData?.performance;
+  const marketTrends = analysisData?.marketTrends;
 
   const sentimentData = {
     labels: ['Positive', 'Neutral', 'Negative'],
     datasets: [
       {
         data: [
-          analysisData?.sentiment?.sentiment === 'positive' ? 60 : 20,
-          analysisData?.sentiment?.sentiment === 'neutral' ? 60 : 20,
-          analysisData?.sentiment?.sentiment === 'negative' ? 60 : 20,
+          sentiment?.sentiment === 'positive' ? 60 : 20,
+          sentiment?.sentiment === 'neutral' ? 60 : 20,
+          sentiment?.sentiment === 'negative' ? 60 : 20,
         ],
         backgroundColor: [
           'rgba(34, 197, 94, 0.8)',
@@ -91,12 +95,12 @@ function Analysis() {
       {
         label: 'Performance Metrics',
         data: [
-          analysisData?.performance?.conversionRate || 0,
-          (analysisData?.performance?.avgRating || 0) * 20, // Scale to 0-100
-          Math.min((analysisData?.performance?.reviewCount || 0) / 10, 100),
-          analysisData?.performance?.priceAnalysis?.position === 'competitive' ? 100 : 
-          analysisData?.performance?.priceAnalysis?.position === 'average' ? 50 : 0,
-          75, // Mock market share
+          performance?.conversionRate || 0,
+          (performance?.avgRating || 0) * 20,
+          Math.min((performance?.reviewCount || 0) / 10, 100),
+          performance?.priceAnalysis?.position === 'competitive' ? 100 :
+          performance?.priceAnalysis?.position === 'average' ? 50 : 0,
+          75,
         ],
         backgroundColor: 'rgba(59, 130, 246, 0.2)',
         borderColor: 'rgba(59, 130, 246, 1)',
@@ -114,7 +118,7 @@ function Analysis() {
     datasets: [
       {
         label: 'Market Demand',
-        data: analysisData?.marketTrends?.seasonality?.map(q => q.demand) || [65, 75, 85, 70],
+        data: marketTrends?.seasonality?.map(q => q.demand) || [65, 75, 85, 70],
         borderColor: 'rgba(34, 197, 94, 1)',
         backgroundColor: 'rgba(34, 197, 94, 0.1)',
         tension: 0.4,
@@ -145,7 +149,7 @@ function Analysis() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
               <option value="">Choose a product</option>
-              {products.map((product) => (
+              {products?.map((product) => (
                 <option key={product.id} value={product.id}>
                   {product.name}
                 </option>
@@ -198,94 +202,37 @@ function Analysis() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Product Overview</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-primary-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Price</p>
-                  <p className="text-lg font-semibold text-gray-900">${selectedProduct.price}</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Star className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Rating</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {analysisData.performance?.avgRating || 0}/5
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Target className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Performance Score</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {analysisData.performance?.performanceScore || 0}/100
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-yellow-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Conversion Rate</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {analysisData.performance?.conversionRate || 0}%
-                  </p>
-                </div>
-              </div>
+              <OverviewItem icon={<DollarSign />} label="Price" value={`$${selectedProduct?.price || 0}`} color="primary" />
+              <OverviewItem icon={<Star />} label="Rating" value={`${performance?.avgRating || 0}/5`} color="green" />
+              <OverviewItem icon={<Target />} label="Performance Score" value={`${performance?.performanceScore || 0}/100`} color="purple" />
+              <OverviewItem icon={<TrendingUp />} label="Conversion Rate" value={`${performance?.conversionRate || 0}%`} color="yellow" />
             </div>
           </div>
 
           {/* Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Sentiment Analysis */}
-            {analysisData.sentiment && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Sentiment Analysis</h3>
-                <div className="h-64">
-                  <Doughnut data={sentimentData} options={{ maintainAspectRatio: false }} />
+            {sentiment && (
+              <ChartCard title="Sentiment Analysis">
+                <Doughnut data={sentimentData} options={{ maintainAspectRatio: false }} />
+                <div className="mt-4 space-y-2 text-sm text-gray-600">
+                  <p><strong>Sentiment:</strong> {sentiment?.sentiment}</p>
+                  <p><strong>Score:</strong> {sentiment?.score?.toFixed(2)}</p>
+                  <p><strong>Keywords:</strong> {sentiment?.keywords?.join(', ') || 'None'}</p>
                 </div>
-                <div className="mt-4 space-y-2">
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Sentiment:</span> {analysisData.sentiment.sentiment}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Score:</span> {analysisData.sentiment.score.toFixed(2)}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Keywords:</span> {analysisData.sentiment.keywords.join(', ')}
-                  </p>
-                </div>
-              </div>
+              </ChartCard>
             )}
 
-            {/* Performance Analysis */}
-            {analysisData.performance && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Metrics</h3>
-                <div className="h-64">
-                  <Radar data={performanceData} options={{ maintainAspectRatio: false }} />
+            {performance && (
+              <ChartCard title="Performance Metrics">
+                <Radar data={performanceData} options={{ maintainAspectRatio: false }} />
+                <div className="mt-4 space-y-2 text-sm text-gray-600">
+                  <p><strong>Price Position:</strong> {performance?.priceAnalysis?.position || 'N/A'}</p>
+                  <p><strong>Price Difference:</strong> {performance?.priceAnalysis?.difference || 0}%</p>
                 </div>
-                <div className="mt-4 space-y-2">
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Price Position:</span> {analysisData.performance.priceAnalysis.position}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Price Difference:</span> {analysisData.performance.priceAnalysis.difference}%
-                  </p>
-                </div>
-              </div>
+              </ChartCard>
             )}
 
-            {/* Market Trends */}
-            {analysisData.marketTrends && (
+            {marketTrends && (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 lg:col-span-2">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Market Trends</h3>
                 <div className="h-64">
@@ -295,23 +242,23 @@ function Analysis() {
                   <div>
                     <p className="text-sm font-medium text-gray-900">Market Growth</p>
                     <p className="text-2xl font-bold text-green-600">
-                      {analysisData.marketTrends.marketGrowth.toFixed(1)}%
+                      {marketTrends?.marketGrowth?.toFixed(1) || 0}%
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-900">Key Drivers</p>
                     <ul className="text-sm text-gray-600 mt-1">
-                      {analysisData.marketTrends.keyDrivers.slice(0, 2).map((driver, index) => (
-                        <li key={index}>• {driver}</li>
-                      ))}
+                      {marketTrends?.keyDrivers?.slice(0, 2).map((driver, i) => (
+                        <li key={i}>• {driver}</li>
+                      )) || <li>None</li>}
                     </ul>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-900">Opportunities</p>
                     <ul className="text-sm text-gray-600 mt-1">
-                      {analysisData.marketTrends.opportunities.slice(0, 2).map((opportunity, index) => (
-                        <li key={index}>• {opportunity}</li>
-                      ))}
+                      {marketTrends?.opportunities?.slice(0, 2).map((o, i) => (
+                        <li key={i}>• {o}</li>
+                      )) || <li>None</li>}
                     </ul>
                   </div>
                 </div>
@@ -320,11 +267,11 @@ function Analysis() {
           </div>
 
           {/* Recommendations */}
-          {analysisData.performance?.recommendations && (
+          {performance?.recommendations?.length > 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Recommendations</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {analysisData.performance.recommendations.map((rec, index) => (
+                {performance.recommendations.map((rec, index) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex items-start space-x-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
@@ -354,7 +301,6 @@ function Analysis() {
         </div>
       )}
 
-      {/* No Analysis State */}
       {!selectedProduct && !analysisData && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
           <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -368,4 +314,24 @@ function Analysis() {
   );
 }
 
-export default Analysis; 
+// Reusable Components
+const OverviewItem = ({ icon, label, value, color }) => (
+  <div className="flex items-center space-x-3">
+    <div className={`w-10 h-10 bg-${color}-100 rounded-lg flex items-center justify-center`}>
+      {React.cloneElement(icon, { className: `w-5 h-5 text-${color}-600` })}
+    </div>
+    <div>
+      <p className="text-sm text-gray-600">{label}</p>
+      <p className="text-lg font-semibold text-gray-900">{value}</p>
+    </div>
+  </div>
+);
+
+const ChartCard = ({ title, children }) => (
+  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+    <div className="h-64">{children}</div>
+  </div>
+);
+
+export default Analysis;
