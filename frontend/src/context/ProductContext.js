@@ -4,6 +4,10 @@ import toast from 'react-hot-toast';
 
 const ProductContext = createContext();
 
+const api = axios.create({
+  baseURL: 'https://testpiece.onrender.com/api'
+});
+
 const initialState = {
   products: [],
   selectedProduct: null,
@@ -17,53 +21,43 @@ function productReducer(state, action) {
   switch (action.type) {
     case 'SET_LOADING':
       return { ...state, loading: action.payload };
-    
     case 'SET_ERROR':
       return { ...state, error: action.payload, loading: false };
-    
     case 'SET_PRODUCTS':
       return { ...state, products: action.payload, loading: false };
-    
     case 'ADD_PRODUCT':
-      return { 
-        ...state, 
+      return {
+        ...state,
         products: [...state.products, action.payload],
-        loading: false 
+        loading: false
       };
-    
     case 'UPDATE_PRODUCT':
       return {
         ...state,
-        products: state.products.map(product => 
+        products: state.products.map(product =>
           product.id === action.payload.id ? action.payload : product
         ),
         loading: false
       };
-    
     case 'DELETE_PRODUCT':
       return {
         ...state,
         products: state.products.filter(product => product.id !== action.payload),
         loading: false
       };
-    
     case 'SET_SELECTED_PRODUCT':
       return { ...state, selectedProduct: action.payload };
-    
     case 'SET_ANALYSIS_DATA':
       return { ...state, analysisData: action.payload };
-    
     case 'SET_COMPETITOR_DATA':
       return { ...state, competitorData: action.payload };
-    
     case 'CLEAR_ANALYSIS':
-      return { 
-        ...state, 
-        analysisData: null, 
+      return {
+        ...state,
+        analysisData: null,
         competitorData: null,
-        selectedProduct: null 
+        selectedProduct: null
       };
-    
     default:
       return state;
   }
@@ -72,7 +66,6 @@ function productReducer(state, action) {
 export function ProductProvider({ children }) {
   const [state, dispatch] = useReducer(productReducer, initialState);
 
-  // Fetch products on mount
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -80,7 +73,7 @@ export function ProductProvider({ children }) {
   const fetchProducts = async () => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const response = await axios.get('/api/products');
+      const response = await api.get('/products');
       dispatch({ type: 'SET_PRODUCTS', payload: response.data.data });
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: error.message });
@@ -91,7 +84,7 @@ export function ProductProvider({ children }) {
   const addProduct = async (productData) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const response = await axios.post('/api/products', productData);
+      const response = await api.post('/products', productData);
       dispatch({ type: 'ADD_PRODUCT', payload: response.data.data });
       toast.success('Product added successfully');
       return response.data.data;
@@ -105,7 +98,7 @@ export function ProductProvider({ children }) {
   const updateProduct = async (id, productData) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const response = await axios.put(`/api/products/${id}`, productData);
+      const response = await api.put(`/products/${id}`, productData);
       dispatch({ type: 'UPDATE_PRODUCT', payload: response.data.data });
       toast.success('Product updated successfully');
       return response.data.data;
@@ -119,7 +112,7 @@ export function ProductProvider({ children }) {
   const deleteProduct = async (id) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      await axios.delete(`/api/products/${id}`);
+      await api.delete(`/products/${id}`);
       dispatch({ type: 'DELETE_PRODUCT', payload: id });
       toast.success('Product deleted successfully');
     } catch (error) {
@@ -133,15 +126,12 @@ export function ProductProvider({ children }) {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       const product = state.products.find(p => p.id === productId);
-      
-      if (!product) {
-        throw new Error('Product not found');
-      }
+      if (!product) throw new Error('Product not found');
 
       let analysisData = {};
-      
+
       if (analysisType === 'sentiment' || analysisType === 'all') {
-        const sentimentResponse = await axios.post('/api/analysis/sentiment', {
+        const sentimentResponse = await api.post('/analysis/sentiment', {
           text: product.description,
           reviews: product.analytics?.reviews || []
         });
@@ -149,7 +139,7 @@ export function ProductProvider({ children }) {
       }
 
       if (analysisType === 'performance' || analysisType === 'all') {
-        const performanceResponse = await axios.post('/api/analysis/performance', {
+        const performanceResponse = await api.post('/analysis/performance', {
           price: product.price,
           views: product.analytics?.views || 0,
           sales: product.analytics?.sales || 0,
@@ -160,7 +150,7 @@ export function ProductProvider({ children }) {
       }
 
       if (analysisType === 'market-trends' || analysisType === 'all') {
-        const trendsResponse = await axios.post('/api/analysis/market-trends', {
+        const trendsResponse = await api.post('/analysis/market-trends', {
           category: product.category
         });
         analysisData.marketTrends = trendsResponse.data.data;
@@ -168,7 +158,6 @@ export function ProductProvider({ children }) {
 
       dispatch({ type: 'SET_ANALYSIS_DATA', payload: analysisData });
       dispatch({ type: 'SET_SELECTED_PRODUCT', payload: product });
-      
       toast.success('Analysis completed successfully');
       return analysisData;
     } catch (error) {
@@ -182,12 +171,9 @@ export function ProductProvider({ children }) {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       const product = state.products.find(p => p.id === productId);
-      
-      if (!product) {
-        throw new Error('Product not found');
-      }
+      if (!product) throw new Error('Product not found');
 
-      const response = await axios.post('/api/competitors/analyze', {
+      const response = await api.post('/competitors/analyze', {
         productName: product.name,
         category: product.category,
         price: product.price,
@@ -206,11 +192,9 @@ export function ProductProvider({ children }) {
 
   const generateReport = async (reportType = 'comprehensive') => {
     try {
-      if (!state.selectedProduct) {
-        throw new Error('No product selected for report generation');
-      }
+      if (!state.selectedProduct) throw new Error('No product selected for report generation');
 
-      const response = await axios.post('/api/reports/generate', {
+      const response = await api.post('/reports/generate', {
         productData: state.selectedProduct,
         analysisData: state.analysisData,
         competitorData: state.competitorData,
@@ -219,7 +203,6 @@ export function ProductProvider({ children }) {
         responseType: 'blob'
       });
 
-      // Create download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -236,11 +219,10 @@ export function ProductProvider({ children }) {
     }
   };
 
-  // Environmental analysis functions
   const analyzeEnvironmentalHazards = async (productData) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const response = await axios.post('/api/environmental/analyze-hazards', productData);
+      const response = await api.post('/environmental/analyze-hazards', productData);
       toast.success('Environmental analysis completed');
       return response.data.data;
     } catch (error) {
@@ -255,7 +237,7 @@ export function ProductProvider({ children }) {
   const compareProductsEnvironmental = async (products) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const response = await axios.post('/api/environmental/compare-products', { products });
+      const response = await api.post('/environmental/compare-products', { products });
       toast.success('Environmental comparison completed');
       return response.data.data;
     } catch (error) {
@@ -269,7 +251,7 @@ export function ProductProvider({ children }) {
 
   const getComplianceChecklist = async () => {
     try {
-      const response = await axios.get('/api/environmental/compliance-checklist');
+      const response = await api.get('/environmental/compliance-checklist');
       return response.data.data;
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: error.message });
@@ -307,4 +289,4 @@ export function useProduct() {
     throw new Error('useProduct must be used within a ProductProvider');
   }
   return context;
-} 
+}
